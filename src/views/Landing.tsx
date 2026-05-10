@@ -34,7 +34,7 @@ export default function Landing() {
             </h1>
 
             <p className="mt-7 text-lg sm:text-xl text-stone-500 leading-relaxed max-w-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              JarJar signifie <em className="text-stone-700 font-semibold not-italic">Histoire</em> en Wolof.
+              JaarJaar signifie <em className="text-stone-700 font-semibold not-italic">Histoire</em> en Wolof.
               Ici, on partage les hauts et les bas de nos parcours. Parce que nul n'est en retard,
               nul n'est en avance — chacun est la ou Allah lui a prescrit.
             </p>
@@ -163,7 +163,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 tracking-tight">
-              Pourquoi JarJar ?
+              Pourquoi JaarJaar ?
             </h2>
             <p className="mt-4 text-stone-500 text-lg max-w-2xl mx-auto">
               Des gens sortent du cancer et reussissent dans leur carriere.
@@ -250,13 +250,13 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 animate-gradient-x" style={{ backgroundSize: '200% 100%' }} />
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Pret a partager ?</h2>
-          <p className="text-stone-400 text-lg mb-8">Ton histoire merite d'etre entendue. Rejoins la communaute JarJar.</p>
+          <p className="text-stone-400 text-lg mb-8">Ton histoire merite d'etre entendue. Rejoins la communaute JaarJaar.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => navigate(user ? '/new' : '/register')}
               className="btn-primary px-8 py-4 text-base bg-white text-stone-900 hover:bg-stone-100 shadow-white/10 group"
             >
-              {user ? 'Ecrire mon histoire' : 'Rejoindre JarJar'}
+              {user ? 'Ecrire mon histoire' : 'Rejoindre JaarJaar'}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
             </button>
             <button

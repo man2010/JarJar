@@ -26,6 +26,14 @@ const footerGroups = [
       { label: 'Sante', route: '/footer/sante' },
     ],
   },
+  {
+    title: 'Informations',
+    links: [
+      { label: 'A propos', route: '/footer/a-propos' },
+      { label: "Guide d'utilisation", route: '/footer/guide' },
+      { label: 'CGU', route: '/footer/cgu' },
+    ],
+  },
 ];
 
 export default function Footer() {
@@ -38,13 +46,13 @@ export default function Footer() {
       <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           <div>
             <button onClick={() => navigate('/')} className="flex items-center gap-2.5 mb-5 group">
               <div className="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/15 transition-colors duration-300">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">JarJar</span>
+              <span className="text-xl font-bold text-white tracking-tight">JaarJaar</span>
             </button>
             <p className="text-sm leading-relaxed text-stone-500">
               La discipline te construit, mais la confiance en soi te fait tenir.
@@ -69,7 +77,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 pt-8 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-stone-600">JarJar — Histoire, Parcours, Motivation. Partage, inspire.</p>
+          <p className="text-xs text-stone-600">JaarJaar — Histoire, Parcours, Motivation. Partage, inspire.</p>
           <p className="text-xs text-stone-700">Nul n'est en retard, nul n'est en avance.</p>
         </div>
       </div>

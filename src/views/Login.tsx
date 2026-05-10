@@ -31,7 +31,7 @@ export default function Login() {
             <div className="w-10 h-10 bg-stone-900 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold text-stone-900 tracking-tight">JarJar</span>
+            <span className="text-2xl font-bold text-stone-900 tracking-tight">JaarJaar</span>
           </button>
           <h1 className="text-2xl font-bold text-stone-900">Bon retour parmi nous</h1>
           <p className="mt-2 text-sm text-stone-500">Connecte-toi pour continuer a partager et lire des histoires</p>

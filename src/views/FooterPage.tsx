@@ -1,10 +1,13 @@
-import {
+﻿import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
   CheckCircle2,
+  FileText,
   HandHeart,
   Heart,
+  HelpCircle,
+  Info,
   Lock,
   PenLine,
   ShieldCheck,
@@ -32,13 +35,14 @@ type FooterPageConfig = {
   secondaryRoute?: string;
   icon: React.ReactNode;
   accent: string;
+  sections?: Detail[];
 };
 
 const pages: Record<string, FooterPageConfig> = {
   explorer: {
     eyebrow: 'Explorer',
     title: 'Lire librement avant de rejoindre la communaute',
-    intro: 'Sur JarJar, personne n est puni parce qu il decouvre la plateforme. Tu peux lire les publications, parcourir les themes et comprendre l esprit du lieu avant de creer un compte.',
+    intro: 'Sur JaarJaar, personne n est puni parce qu il decouvre la plateforme. Tu peux lire les publications, parcourir les themes et comprendre l esprit du lieu avant de creer un compte.',
     details: [
       { title: 'Lecture ouverte', text: 'Les histoires publiees restent accessibles aux visiteurs pour que chacun puisse trouver de l inspiration sans barriere inutile.' },
       { title: 'Compte au bon moment', text: 'Le compte devient utile quand tu veux aimer, commenter, sauvegarder, publier ou faire une demande de collecte.' },
@@ -56,7 +60,7 @@ const pages: Record<string, FooterPageConfig> = {
   partager: {
     eyebrow: 'Contribution',
     title: 'Transformer ton vecu en force pour quelqu un d autre',
-    intro: 'Partager sur JarJar, ce n est pas publier pour remplir une page. C est poser une experience, une chute, une reprise ou une lecon qui peut aider une autre personne a tenir.',
+    intro: 'Partager sur JaarJaar, ce n est pas publier pour remplir une page. C est poser une experience, une chute, une reprise ou une lecon qui peut aider une autre personne a tenir.',
     details: [
       { title: 'Choisir ton format', text: 'Article, audio, video ou confession: tu choisis la forme qui respecte le mieux ce que tu as a dire.' },
       { title: 'Rester maitre de ton recit', text: 'Tu peux signer ton histoire ou la publier anonymement quand le sujet demande plus de pudeur.' },
@@ -209,6 +213,86 @@ const pages: Record<string, FooterPageConfig> = {
     icon: <BookOpen className="w-5 h-5" />,
     accent: 'bg-violet-600',
   },
+  'a-propos': {
+    eyebrow: 'A propos',
+    title: 'JaarJaar, un espace pour raconter ce qui construit vraiment une personne',
+    intro: 'JaarJaar veut donner une place aux parcours reels: ceux qui avancent vite, ceux qui recommencent, ceux qui doutent, ceux qui traversent une maladie, une epreuve, une reconversion ou une prise de conscience.',
+    details: [
+      { title: 'Une plateforme de recits', text: 'On y publie des histoires, articles, audios, videos et confessions pour transmettre une experience utile.' },
+      { title: 'Une communaute responsable', text: 'Lire est ouvert. Participer demande un compte pour garder un cadre serieux et proteger les interactions.' },
+      { title: 'Un volet solidaire', text: 'Les collectes donnent de la visibilite a des urgences et projets verifies avant publication.' },
+    ],
+    sections: [
+      { title: 'Pourquoi JaarJaar existe', text: 'Beaucoup de personnes vivent des choses fortes sans avoir d espace juste pour les raconter. JaarJaar part d une idee simple: une histoire sincere peut devenir une aide pour quelqu un d autre. Elle peut donner du courage, eviter a une personne de se sentir seule, ou lui permettre de comprendre une situation qu elle traverse.' },
+      { title: 'Ce que la plateforme accueille', text: 'JaarJaar accueille les parcours de vie, les confessions anonymes, les temoignages de sante, les histoires de motivation, les projets, les reprises apres l echec et les recits de transformation. Le but n est pas de montrer une vie parfaite, mais de partager ce qui a ete appris sur le chemin.' },
+      { title: 'Notre exigence', text: 'La plateforme cherche un equilibre entre liberte de parole et responsabilite. Les contenus anonymes sont possibles, mais le respect, la dignite des personnes et la securite de la communaute restent essentiels. Les collectes passent par une validation afin de proteger la confiance.' },
+    ],
+    noteTitle: 'Esprit de JaarJaar',
+    note: 'Lire, comprendre, raconter, soutenir. La plateforme met l humain avant la performance.',
+    primaryLabel: 'Explorer les histoires',
+    primaryRoute: '/feed',
+    secondaryLabel: 'Creer un compte',
+    secondaryRoute: '/register',
+    icon: <Info className="w-5 h-5" />,
+    accent: 'bg-blue-700',
+  },
+  guide: {
+    eyebrow: 'Guide d utilisation',
+    title: 'Comprendre JaarJaar pas a pas, de la lecture a la publication',
+    intro: 'Ce guide explique precisement comment utiliser la plateforme: lire, creer un compte, publier, commenter, sauvegarder, demander une collecte et gerer ton espace.',
+    details: [
+      { title: 'Lire sans compte', text: 'Tu peux parcourir les publications, les themes et les formats sans inscription.' },
+      { title: 'Compte pour participer', text: 'Le compte est necessaire pour publier, commenter, aimer, sauvegarder ou demander une collecte.' },
+      { title: 'Actions claires', text: 'Chaque espace indique ce que tu peux faire et ce qui demande une connexion.' },
+    ],
+    sections: [
+      { title: '1. Explorer les histoires', text: 'Va dans Explorer pour lire les publications. Tu peux filtrer par thematique, par format, ou ouvrir une publication pour lire le detail. La lecture reste accessible sans compte afin de ne pas bloquer les visiteurs.' },
+      { title: '2. Creer un compte', text: 'L inscription demande un nom, un pseudo, un email, un mot de passe et l acceptation des CGU. Le pseudo sert a identifier ton profil public lorsque tu publies sans anonymat.' },
+      { title: '3. Publier une histoire', text: 'Depuis Ecrire, choisis le type de publication: article, video, audio ou confession. Ajoute un titre, ton texte, un extrait si besoin, une image de couverture par lien ou upload local, puis choisis la thematique. Tu peux publier directement ou enregistrer en brouillon.' },
+      { title: '4. Publier anonymement', text: 'Tu peux activer l anonymat sur une publication. Les confessions sont anonymes par defaut. Le profil auteur n est pas expose publiquement sur ces contenus.' },
+      { title: '5. Interagir avec les contenus', text: 'Pour aimer, commenter, repondre ou sauvegarder une histoire en favori, il faut etre connecte. Cela permet de limiter les abus et de garder des interactions plus responsables.' },
+      { title: '6. Gerer tes histoires', text: 'Dans ton profil, la section Mes histoires affiche tes publications par page de 5. Tu peux modifier ou supprimer tes contenus. Les brouillons restent visibles dans ton espace.' },
+      { title: '7. Utiliser les collectes', text: 'Tu peux consulter les collectes validees. Pour demander de l aide, cree une demande avec le contexte, les documents justificatifs et le montant cible. La demande est examinee avant publication.' },
+      { title: '8. Notifications et favoris', text: 'Les notifications t informent des interactions importantes. Les favoris te permettent de garder les histoires que tu veux relire plus tard.' },
+    ],
+    noteTitle: 'Principe important',
+    note: 'JaarJaar laisse lire librement. Le compte intervient seulement quand l utilisateur veut agir ou contribuer.',
+    primaryLabel: 'Commencer a explorer',
+    primaryRoute: '/feed',
+    secondaryLabel: 'Creer mon compte',
+    secondaryRoute: '/register',
+    icon: <HelpCircle className="w-5 h-5" />,
+    accent: 'bg-emerald-700',
+  },
+  cgu: {
+    eyebrow: 'CGU',
+    title: 'Conditions generales d utilisation de JaarJaar',
+    intro: 'Ces conditions expliquent les regles d utilisation de la plateforme, les responsabilites des utilisateurs et le cadre applique aux contenus, interactions et collectes.',
+    details: [
+      { title: 'Respect', text: 'Les contenus haineux, humiliants, menaçants, frauduleux ou portant atteinte a autrui ne sont pas acceptes.' },
+      { title: 'Responsabilite', text: 'Chaque utilisateur reste responsable des contenus, documents et informations qu il publie.' },
+      { title: 'Moderation', text: 'JaarJaar peut retirer un contenu, suspendre un compte ou refuser une collecte en cas de risque ou d abus.' },
+    ],
+    sections: [
+      { title: '1. Acceptation des conditions', text: 'En creant un compte ou en utilisant les fonctionnalites participatives de JaarJaar, l utilisateur accepte les presentes conditions. La lecture des contenus publics peut rester ouverte, mais la participation demande le respect de ces regles.' },
+      { title: '2. Compte utilisateur', text: 'L utilisateur s engage a fournir des informations exactes, a proteger son mot de passe et a ne pas utiliser le compte d une autre personne. JaarJaar peut suspendre un compte en cas d usage abusif.' },
+      { title: '3. Publications et commentaires', text: 'L utilisateur est responsable des histoires, commentaires, audios, videos, images et documents qu il publie. Les contenus diffamatoires, violents, discriminatoires, harcelants, pornographiques, frauduleux ou contraires a la loi peuvent etre retires.' },
+      { title: '4. Anonymat', text: 'L anonymat permet de proteger l identite publique d un auteur, mais il ne doit pas servir a nuire, mentir, harceler ou contourner les regles. JaarJaar peut moderer un contenu anonyme comme tout autre contenu.' },
+      { title: '5. Collectes solidaires', text: 'Les demandes de collecte doivent etre sinceres, documentees et conformes a leur objet. L utilisateur qui demande de l aide doit fournir des informations utiles et authentiques. JaarJaar peut refuser, suspendre ou retirer une collecte si elle parait incomplete, trompeuse ou abusive.' },
+      { title: '6. Medias et documents', text: 'Les images, audios, videos et documents envoyes doivent appartenir a l utilisateur ou etre utilises avec autorisation. L utilisateur ne doit pas publier de donnees sensibles d une autre personne sans consentement.' },
+      { title: '7. Moderation et administration', text: 'Les administrateurs peuvent examiner les contenus, collectes et comptes lorsque cela est necessaire au bon fonctionnement de la plateforme. Des actions de moderation peuvent etre appliquees sans preavis en cas d urgence ou de risque.' },
+      { title: '8. Disponibilite du service', text: 'JaarJaar fait de son mieux pour maintenir l acces a la plateforme, mais ne garantit pas une disponibilite permanente. Des interruptions peuvent arriver pour maintenance, incident technique ou probleme de service externe.' },
+      { title: '9. Evolution des conditions', text: 'Ces conditions peuvent evoluer pour accompagner la plateforme. Les utilisateurs seront invites a consulter la version disponible sur cette page.' },
+    ],
+    noteTitle: 'Acceptation',
+    note: 'L inscription exige l acceptation des CGU afin que chaque membre rejoigne la communaute avec les memes regles de base.',
+    primaryLabel: 'Creer un compte',
+    primaryRoute: '/register',
+    secondaryLabel: 'Retour a l accueil',
+    secondaryRoute: '/',
+    icon: <FileText className="w-5 h-5" />,
+    accent: 'bg-stone-900',
+  },
 };
 
 export default function FooterPage({ slug }: { slug?: string }) {
@@ -250,6 +334,17 @@ export default function FooterPage({ slug }: { slug?: string }) {
                   </article>
                 ))}
               </div>
+
+              {page.sections && (
+                <div className="mt-10 space-y-5">
+                  {page.sections.map((section) => (
+                    <section key={section.title} className="border-t border-stone-100 pt-5">
+                      <h2 className="text-lg font-bold text-stone-900 mb-2">{section.title}</h2>
+                      <p className="text-sm sm:text-base text-stone-500 leading-relaxed">{section.text}</p>
+                    </section>
+                  ))}
+                </div>
+              )}
 
               <div className="mt-9 flex flex-col sm:flex-row gap-3">
                 <button onClick={() => navigate(primaryRoute)} className="btn-primary px-6 py-3 group">

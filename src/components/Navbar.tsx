@@ -83,7 +83,7 @@ export default function Navbar() {
             <div className="w-9 h-9 bg-stone-900 rounded-xl flex items-center justify-center group-hover:scale-105 group-hover:rotate-[-2deg] transition-all duration-300">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-stone-900 tracking-tight">JarJar</span>
+            <span className="text-xl font-bold text-stone-900 tracking-tight">JaarJaar</span>
           </button>
 
           <div className="hidden md:flex items-center gap-1">

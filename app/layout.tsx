@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import '../src/index.css';
 
 export const metadata: Metadata = {
-  title: 'JarJar',
+  title: 'JaarJaar',
   description: 'Histoires, confessions anonymes et parcours inspirants.',
 };
 

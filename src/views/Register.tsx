@@ -10,6 +10,7 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -19,6 +20,7 @@ export default function Register() {
     if (username.length < 3) { setError('Le pseudo doit avoir au moins 3 caracteres'); return; }
     if (!/^[a-zA-Z0-9_]+$/.test(username)) { setError('Le pseudo ne peut contenir que des lettres, chiffres et _'); return; }
     if (password.length < 6) { setError('Le mot de passe doit avoir au moins 6 caracteres'); return; }
+    if (!acceptedTerms) { setError('Tu dois lire et accepter les CGU pour creer un compte'); return; }
     setLoading(true);
     const { error: authError } = await signUp(email, password, username, fullName);
     if (authError) { setError(authError); setLoading(false); }
@@ -36,7 +38,7 @@ export default function Register() {
             <div className="w-10 h-10 bg-stone-900 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold text-stone-900 tracking-tight">JarJar</span>
+            <span className="text-2xl font-bold text-stone-900 tracking-tight">JaarJaar</span>
           </button>
           <h1 className="text-2xl font-bold text-stone-900">Rejoins la communaute</h1>
           <p className="mt-2 text-sm text-stone-500">Ton histoire merite d'etre racontee</p>
@@ -70,7 +72,22 @@ export default function Register() {
                 </button>
               </div>
             </div>
-            <button type="submit" disabled={loading} className="btn-primary w-full py-3.5 text-base disabled:opacity-40">
+            <label className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(event) => setAcceptedTerms(event.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-stone-300 text-stone-900 focus:ring-stone-500"
+              />
+              <span className="text-xs text-stone-500 leading-relaxed">
+                J ai lu et j accepte les{' '}
+                <button type="button" onClick={() => navigate('/footer/cgu')} className="font-semibold text-stone-900 hover:underline">
+                  conditions generales d utilisation
+                </button>
+                .
+              </span>
+            </label>
+            <button type="submit" disabled={loading || !acceptedTerms} className="btn-primary w-full py-3.5 text-base disabled:opacity-40">
               {loading ? 'Creation...' : 'Creer mon compte'}
             </button>
           </form>
