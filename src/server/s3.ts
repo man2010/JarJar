@@ -1,19 +1,24 @@
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 export function isS3Configured() {
-  return Boolean(process.env.AWS_REGION && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_S3_BUCKET);
+  return Boolean(
+    process.env.FINLEGIA_AWS_REGION &&
+    process.env.FINLEGIA_AWS_ACCESS_KEY_ID &&
+    process.env.FINLEGIA_AWS_SECRET_ACCESS_KEY &&
+    process.env.FINLEGIA_AWS_S3_BUCKET
+  );
 }
 
 export function s3Bucket() {
-  const bucket = process.env.AWS_S3_BUCKET;
-  if (!bucket) throw new Error('AWS_S3_BUCKET is required');
+  const bucket = process.env.FINLEGIA_AWS_S3_BUCKET;
+  if (!bucket) throw new Error('FINLEGIA_AWS_S3_BUCKET is required');
   return bucket;
 }
 
 export function s3Client() {
-  const region = process.env.AWS_REGION;
-  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const region = process.env.FINLEGIA_AWS_REGION;
+  const accessKeyId = process.env.FINLEGIA_AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.FINLEGIA_AWS_SECRET_ACCESS_KEY;
   if (!region || !accessKeyId || !secretAccessKey) throw new Error('AWS S3 is not configured');
 
   return new S3Client({

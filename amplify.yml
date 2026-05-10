@@ -13,10 +13,10 @@ frontend:
         - echo "MONGODB_DB=$MONGODB_DB" >> .env.production
         - echo "AUTH_SECRET=$AUTH_SECRET" >> .env.production
         - echo "NEXT_PUBLIC_ADMIN_EMAILS=$NEXT_PUBLIC_ADMIN_EMAILS" >> .env.production
-        - echo "AWS_REGION=$AWS_REGION" >> .env.production
-        - echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env.production
-        - echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env.production
-        - echo "AWS_S3_BUCKET=$AWS_S3_BUCKET" >> .env.production
+        - echo "FINLEGIA_AWS_REGION=$FINLEGIA_AWS_REGION" >> .env.production
+        - echo "FINLEGIA_AWS_ACCESS_KEY_ID=$FINLEGIA_AWS_ACCESS_KEY_ID" >> .env.production
+        - echo "FINLEGIA_AWS_SECRET_ACCESS_KEY=$FINLEGIA_AWS_SECRET_ACCESS_KEY" >> .env.production
+        - echo "FINLEGIA_AWS_S3_BUCKET=$FINLEGIA_AWS_S3_BUCKET" >> .env.production
         # ── Vérification visible dans les logs de build ──
         - echo "✅ .env.production généré avec $(wc -l < .env.production) lignes"
         - npm run build
