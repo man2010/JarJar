@@ -15,6 +15,7 @@ import Collectes from './views/Collectes';
 import CollecteDetail from './views/CollecteDetail';
 import Admin from './views/Admin';
 import Notifications from './views/Notifications';
+import FooterPage from './views/FooterPage';
 
 function AppContent() {
   const { route } = useRouter();
@@ -62,6 +63,8 @@ function AppContent() {
     page = <CollecteDetail id={route.params.id} />;
   } else if (path === '/admin') {
     page = <Admin />;
+  } else if (path.startsWith('/footer/')) {
+    page = <FooterPage slug={route.params.slug} />;
   } else {
     page = <Landing />;
   }

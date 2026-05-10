@@ -1,6 +1,33 @@
 import { BookOpen } from 'lucide-react';
 import { navigate } from '../hooks/useRouter';
 
+const footerGroups = [
+  {
+    title: 'Navigation',
+    links: [
+      { label: 'Explorer', route: '/footer/explorer' },
+      { label: 'Partager ton histoire', route: '/footer/partager' },
+      { label: 'Favoris', route: '/footer/favoris' },
+    ],
+  },
+  {
+    title: 'Solidarite',
+    links: [
+      { label: 'Collectes solidaires', route: '/footer/collectes-solidaires' },
+      { label: "Demander de l'aide", route: '/footer/demander-aide' },
+    ],
+  },
+  {
+    title: 'Thematiques',
+    links: [
+      { label: 'Parcours de vie', route: '/footer/parcours-de-vie' },
+      { label: 'Confessions', route: '/footer/confessions' },
+      { label: 'Motivation', route: '/footer/motivation' },
+      { label: 'Sante', route: '/footer/sante' },
+    ],
+  },
+];
+
 export default function Footer() {
   return (
     <footer className="bg-stone-900 text-stone-400 relative overflow-hidden">
@@ -25,32 +52,20 @@ export default function Footer() {
             </p>
           </div>
 
-          <div>
-            <h3 className="text-xs font-semibold text-stone-300 uppercase tracking-widest mb-4">Navigation</h3>
-            <ul className="space-y-2.5">
-              <li><button onClick={() => navigate('/feed')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Explorer</button></li>
-              <li><button onClick={() => navigate('/new')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Partager ton histoire</button></li>
-              <li><button onClick={() => navigate('/bookmarks')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Favoris</button></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-semibold text-stone-300 uppercase tracking-widest mb-4">Solidarite</h3>
-            <ul className="space-y-2.5">
-              <li><button onClick={() => navigate('/collectes')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Collectes solidaires</button></li>
-              <li><button onClick={() => navigate('/collecte')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Demander de l'aide</button></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-semibold text-stone-300 uppercase tracking-widest mb-4">Thematiques</h3>
-            <ul className="space-y-2.5">
-              <li><button onClick={() => navigate('/feed?category=parcours-de-vie')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Parcours de vie</button></li>
-              <li><button onClick={() => navigate('/feed?category=confessions')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Confessions</button></li>
-              <li><button onClick={() => navigate('/feed?category=motivation')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Motivation</button></li>
-              <li><button onClick={() => navigate('/feed?category=sante')} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">Sante</button></li>
-            </ul>
-          </div>
+          {footerGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="text-xs font-semibold text-stone-300 uppercase tracking-widest mb-4">{group.title}</h3>
+              <ul className="space-y-2.5">
+                {group.links.map((link) => (
+                  <li key={link.route}>
+                    <button onClick={() => navigate(link.route)} className="text-sm text-stone-500 hover:text-white transition-colors duration-200">
+                      {link.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         <div className="mt-14 pt-8 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4">

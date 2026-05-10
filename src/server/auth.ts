@@ -40,20 +40,26 @@ export async function getSessionUser(request?: NextRequest): Promise<ServerUser 
   const token = request?.cookies.get(cookieName)?.value || cookies().get(cookieName)?.value;
   if (!token) return null;
 
+  const { payload } = await jwtVerify(token, secret).catch(() => ({ payload: null }));
+  if (!payload?.sub || !payload.email) return null;
+
+  const db = await getDb();
+  const [profile, account] = await Promise.all([
+    db.collection('profiles').findOne({ id: payload.sub }),
+    db.collection('users').findOne({ id: payload.sub }),
+  ]);
+
+  return {
+    id: payload.sub,
+    email: String(payload.email),
+    role: profile?.role || account?.role || String(payload.role || 'user'),
+    status: account?.status || profile?.status || 'active',
+  };
+}
+
+export async function getSessionUserSilently(request?: NextRequest): Promise<ServerUser | null> {
   try {
-    const { payload } = await jwtVerify(token, secret);
-    if (!payload.sub || !payload.email) return null;
-    const db = await getDb();
-    const [profile, account] = await Promise.all([
-      db.collection('profiles').findOne({ id: payload.sub }),
-      db.collection('users').findOne({ id: payload.sub }),
-    ]);
-    return {
-      id: payload.sub,
-      email: String(payload.email),
-      role: profile?.role || account?.role || String(payload.role || 'user'),
-      status: account?.status || profile?.status || 'active',
-    };
+    return await getSessionUser(request);
   } catch {
     return null;
   }

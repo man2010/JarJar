@@ -36,15 +36,15 @@ export async function POST(request: NextRequest) {
 
   const form = await request.formData();
   const file = form.get('file');
-  const kind = form.get('kind') === 'audio' ? 'audio' : form.get('kind') === 'video' ? 'video' : form.get('kind') === 'document' ? 'document' : form.get('kind') === 'avatar' ? 'avatar' : null;
+  const kind = form.get('kind') === 'audio' ? 'audio' : form.get('kind') === 'video' ? 'video' : form.get('kind') === 'document' ? 'document' : form.get('kind') === 'avatar' ? 'avatar' : form.get('kind') === 'image' ? 'image' : null;
   if (!(file instanceof File)) return NextResponse.json({ error: 'Fichier manquant' }, { status: 400 });
   const contentType = normalizeContentType(file.type, file.name, kind);
-  const allowed = kind === 'avatar' ? allowedAvatars : kind === 'document' ? allowedDocuments : allowedMedia;
+  const allowed = kind === 'avatar' || kind === 'image' ? allowedAvatars : kind === 'document' ? allowedDocuments : allowedMedia;
   if (!allowed.has(contentType)) {
     return NextResponse.json({ error: `Format media non supporte: ${file.type || file.name}` }, { status: 400 });
   }
 
-  const maxSize = kind === 'avatar' ? 2 * 1024 * 1024 : kind === 'document' ? 15 * 1024 * 1024 : contentType.startsWith('audio/') ? 35 * 1024 * 1024 : 120 * 1024 * 1024;
+  const maxSize = kind === 'avatar' ? 2 * 1024 * 1024 : kind === 'image' ? 8 * 1024 * 1024 : kind === 'document' ? 15 * 1024 * 1024 : contentType.startsWith('audio/') ? 35 * 1024 * 1024 : 120 * 1024 * 1024;
   if (file.size > maxSize) return NextResponse.json({ error: 'Fichier trop volumineux' }, { status: 413 });
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ data: { url: `/api/media/${mediaId}`, id: mediaId, storage: 'mongodb', name: file.name, content_type: contentType } });
 }
 
-function normalizeContentType(type: string, filename: string, kind: 'audio' | 'video' | 'document' | 'avatar' | null) {
+function normalizeContentType(type: string, filename: string, kind: 'audio' | 'video' | 'document' | 'avatar' | 'image' | null) {
   const clean = type.split(';')[0].trim().toLowerCase();
   if (clean) return clean;
 

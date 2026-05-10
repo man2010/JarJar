@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { navigate } from '../hooks/useRouter';
-import { Lock, BookOpen, Video, Eye, EyeOff, ArrowLeft, Headphones } from 'lucide-react';
+import { Lock, BookOpen, Video, Eye, EyeOff, ArrowLeft, Headphones, Upload, X } from 'lucide-react';
 import MediaRecorderField from '../components/MediaRecorderField';
 
 interface Category {
@@ -29,6 +29,8 @@ export default function NewPost({ editId }: { editId?: string }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [mediaUploading, setMediaUploading] = useState(false);
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [coverUploadError, setCoverUploadError] = useState('');
 
   useEffect(() => { if (!user) { navigate('/login'); return; } fetchCategories(); }, [user]);
   useEffect(() => { if (user && editId) fetchPostForEdit(); }, [user, editId]);
@@ -66,7 +68,7 @@ export default function NewPost({ editId }: { editId?: string }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (mediaUploading) return;
+    if (mediaUploading || coverUploading) return;
     if (!user || !title.trim() || (!content.trim() && !audioUrl && !videoUrl)) return;
     setSubmitting(true);
     const payload = {
@@ -95,6 +97,26 @@ export default function NewPost({ editId }: { editId?: string }) {
     setConfessionMediaKind(kind);
     if (kind !== 'audio') setAudioUrl('');
     if (kind !== 'video') setVideoUrl('');
+  }
+
+  async function uploadCoverImage(file: File | null) {
+    if (!file) return;
+    setCoverUploading(true);
+    setCoverUploadError('');
+
+    try {
+      const data = new FormData();
+      data.append('file', file, file.name);
+      data.append('kind', 'image');
+      const response = await fetch('/api/media', { method: 'POST', body: data, credentials: 'include' });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Upload de l image impossible');
+      setCoverImageUrl(payload.data.url);
+    } catch (error) {
+      setCoverUploadError(error instanceof Error ? error.message : 'Upload de l image impossible');
+    } finally {
+      setCoverUploading(false);
+    }
   }
 
   return (
@@ -148,8 +170,40 @@ export default function NewPost({ editId }: { editId?: string }) {
 
           <div>
             <label className="block text-sm font-medium text-stone-700 mb-1.5">Image de couverture <span className="text-stone-400 font-normal">(URL)</span></label>
-            <input type="url" value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg" className="input" />
+            <div className="flex gap-2">
+              <input type="url" value={coverImageUrl} onChange={(e) => { setCoverImageUrl(e.target.value); setCoverUploadError(''); }}
+                placeholder="https://example.com/image.jpg" className="input flex-1" />
+              <label className={`btn-secondary w-12 px-0 flex-shrink-0 cursor-pointer ${coverUploading ? 'opacity-60 cursor-wait' : ''}`} title="Uploader une image locale">
+                <Upload className="w-4 h-4" />
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                  disabled={coverUploading}
+                  onChange={(event) => {
+                    void uploadCoverImage(event.target.files?.[0] || null);
+                    event.target.value = '';
+                  }}
+                  className="hidden"
+                />
+              </label>
+              {coverImageUrl && (
+                <button type="button" onClick={() => { setCoverImageUrl(''); setCoverUploadError(''); }} className="btn-secondary w-12 px-0 flex-shrink-0" title="Retirer l'image">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <div className="mt-2 min-h-[18px]">
+              {coverUploading && <p className="text-xs text-stone-400">Upload de l image...</p>}
+              {coverUploadError && <p className="text-xs text-red-600">{coverUploadError}</p>}
+              {!coverUploading && !coverUploadError && coverImageUrl && (
+                <p className="text-xs text-stone-400 truncate">Image selectionnee : {coverImageUrl}</p>
+              )}
+            </div>
+            {coverImageUrl && (
+              <div className="mt-3 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+                <img src={coverImageUrl} alt="" className="h-40 w-full object-cover" />
+              </div>
+            )}
           </div>
 
           {postType === 'video' && (
@@ -249,12 +303,12 @@ export default function NewPost({ editId }: { editId?: string }) {
           )}
 
           <div className="flex items-center gap-3 pt-4">
-            <button type="submit" disabled={submitting || mediaUploading || !title.trim() || (!content.trim() && !audioUrl && !videoUrl)}
+            <button type="submit" disabled={submitting || mediaUploading || coverUploading || !title.trim() || (!content.trim() && !audioUrl && !videoUrl)}
               className="btn-primary flex-1 py-4 text-base disabled:opacity-40 disabled:cursor-not-allowed">
-              {mediaUploading ? 'Envoi du media...' : submitting ? 'Enregistrement...' : editId ? 'Enregistrer' : 'Publier'}
+              {coverUploading ? 'Envoi de l image...' : mediaUploading ? 'Envoi du media...' : submitting ? 'Enregistrement...' : editId ? 'Enregistrer' : 'Publier'}
             </button>
             <button type="button" onClick={async () => {
-              if (mediaUploading || !title.trim() || (!content.trim() && !audioUrl && !videoUrl)) return;
+              if (mediaUploading || coverUploading || !title.trim() || (!content.trim() && !audioUrl && !videoUrl)) return;
               setPublished(false); setSubmitting(true);
               const draftPayload = {
                 title: title.trim(), content: content.trim(),
@@ -269,7 +323,7 @@ export default function NewPost({ editId }: { editId?: string }) {
                 : await supabase.from('posts').insert(draftPayload).select('id').maybeSingle();
               setSubmitting(false);
               if (data) navigate(`/post/${data.id}`);
-            }} disabled={submitting || mediaUploading} className="btn-secondary px-6 py-4 text-base disabled:opacity-40 disabled:cursor-not-allowed">
+            }} disabled={submitting || mediaUploading || coverUploading} className="btn-secondary px-6 py-4 text-base disabled:opacity-40 disabled:cursor-not-allowed">
               Brouillon
             </button>
           </div>

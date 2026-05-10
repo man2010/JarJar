@@ -376,19 +376,27 @@ async function deleteRows(db: any, body: DataRequest, user: Awaited<ReturnType<t
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json() as DataRequest;
-  if (!tables.has(body.table)) return NextResponse.json({ error: 'Table inconnue' }, { status: 400 });
+  try {
+    const body = await request.json() as DataRequest;
+    if (!tables.has(body.table)) return NextResponse.json({ error: 'Table inconnue' }, { status: 400 });
 
-  const db = await getDb();
-  const user = await getSessionUser(request);
+    const db = await getDb();
+    const user = await getSessionUser(request);
 
-  if (body.operation === 'select') {
-    const result = await selectRows(db, body, user);
-    return NextResponse.json(result);
+    if (body.operation === 'select') {
+      const result = await selectRows(db, body, user);
+      return NextResponse.json(result);
+    }
+    if (body.operation === 'insert') return insertRows(db, body, user);
+    if (body.operation === 'update') return updateRows(db, body, user);
+    if (body.operation === 'delete') return deleteRows(db, body, user);
+
+    return NextResponse.json({ error: 'Operation inconnue' }, { status: 400 });
+  } catch (error) {
+    console.error('[api/data] MongoDB unavailable:', error instanceof Error ? error.message : error);
+    return NextResponse.json(
+      { error: 'Base de donnees momentanement indisponible. Reessaie dans quelques instants.' },
+      { status: 503 },
+    );
   }
-  if (body.operation === 'insert') return insertRows(db, body, user);
-  if (body.operation === 'update') return updateRows(db, body, user);
-  if (body.operation === 'delete') return deleteRows(db, body, user);
-
-  return NextResponse.json({ error: 'Operation inconnue' }, { status: 400 });
 }

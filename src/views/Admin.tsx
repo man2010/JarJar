@@ -9,6 +9,9 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle,
   Clock,
   Database,
@@ -20,6 +23,7 @@ import {
   Lock,
   MessageCircle,
   Plus,
+  RefreshCw,
   Rocket,
   Shield,
   SquarePen as PenSquare,
@@ -129,6 +133,8 @@ type AdminComment = {
   content: string;
   is_anonymous: boolean;
   created_at: string;
+  post_id?: string;
+  post_title?: string;
   profiles: { username: string; full_name: string } | null;
 };
 
@@ -156,6 +162,13 @@ type UserDetail = {
   stats: { posts_count: number; comments_count: number; collectes_count: number; donations_count: number };
 };
 
+type AdminActivityResult<T> = {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
 const typeIcons: Record<string, React.ReactNode> = {
   article: <BookOpen className="w-4 h-4" />,
   video: <Video className="w-4 h-4" />,
@@ -169,12 +182,46 @@ export default function Admin() {
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'collectes' | 'posts' | 'users' | 'media' | 'reporting'>('overview');
+  const [activityType, setActivityType] = useState<'posts' | 'comments'>('posts');
+  const [activityDate, setActivityDate] = useState(() => formatInputDate(new Date()));
+  const [activityHour, setActivityHour] = useState(() => String(new Date().getHours()).padStart(2, '0'));
+  const [activityPage, setActivityPage] = useState(1);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityError, setActivityError] = useState('');
+  const [activityPosts, setActivityPosts] = useState<AdminActivityResult<AdminPost>>({ items: [], total: 0, page: 1, pageSize: 10 });
+  const [activityComments, setActivityComments] = useState<AdminActivityResult<AdminComment>>({ items: [], total: 0, page: 1, pageSize: 10 });
+  const [adminUsers, setAdminUsers] = useState<AdminActivityResult<AdminUser>>({ items: [], total: 0, page: 1, pageSize: 5 });
+  const [userFilterDate, setUserFilterDate] = useState('');
+  const [userFilterStatus, setUserFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [userPage, setUserPage] = useState(1);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState('');
+  const [overviewPostsPage, setOverviewPostsPage] = useState(1);
+  const [topPostsPage, setTopPostsPage] = useState(1);
+  const [activeUsersPage, setActiveUsersPage] = useState(1);
+  const [mediaPage, setMediaPage] = useState(1);
+  const [collectesPage, setCollectesPage] = useState(1);
 
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
     if (!isAdmin) return;
     void fetchReport();
   }, [user, isAdmin]);
+
+  useEffect(() => {
+    if (!user || !isAdmin) return;
+    if (activeTab !== 'posts' && activeTab !== 'reporting') return;
+    void fetchActivity();
+  }, [user, isAdmin, activeTab, activityType, activityDate, activityHour, activityPage]);
+
+  useEffect(() => {
+    if (activeTab === 'posts' && activityType !== 'posts') changeActivityFilter({ type: 'posts' });
+  }, [activeTab, activityType]);
+
+  useEffect(() => {
+    if (!user || !isAdmin || activeTab !== 'users') return;
+    void fetchAdminUsers();
+  }, [user, isAdmin, activeTab, userFilterDate, userFilterStatus, userPage]);
 
   async function fetchReport() {
     setLoading(true);
@@ -199,11 +246,13 @@ export default function Admin() {
   async function togglePublish(postId: string, currentPublished: boolean) {
     await supabase.from('posts').update({ published: !currentPublished }).eq('id', postId);
     await fetchReport();
+    if (activeTab === 'posts' || activeTab === 'reporting') await fetchActivity();
   }
 
   async function deletePost(postId: string) {
     await supabase.from('posts').delete().eq('id', postId);
     await fetchReport();
+    if (activeTab === 'posts' || activeTab === 'reporting') await fetchActivity();
   }
 
   async function updateUserStatus(userId: string, status: 'active' | 'suspended') {
@@ -214,11 +263,66 @@ export default function Admin() {
       body: JSON.stringify({ status }),
     });
     await fetchReport();
+    if (activeTab === 'users') await fetchAdminUsers();
   }
 
   async function showUserDetail(userId: string) {
     const { data } = await api.get<UserDetail>(`/api/admin/users/${userId}`);
     if (data) setUserDetail(data);
+  }
+
+  async function fetchActivity() {
+    const range = hourRange(activityDate, activityHour);
+    setActivityLoading(true);
+    setActivityError('');
+    const query = new URLSearchParams({
+      type: activityType,
+      start: range.start,
+      end: range.end,
+      page: String(activityPage),
+      pageSize: '5',
+    });
+    const { data, error } = await api.get<AdminActivityResult<AdminPost | AdminComment>>(`/api/admin/activity?${query.toString()}`);
+    if (error) {
+      setActivityError(error.message);
+    } else if (data && activityType === 'posts') {
+      setActivityPosts(data as AdminActivityResult<AdminPost>);
+    } else if (data) {
+      setActivityComments(data as AdminActivityResult<AdminComment>);
+    }
+    setActivityLoading(false);
+  }
+
+  function changeActivityFilter(next: { type?: 'posts' | 'comments'; date?: string; hour?: string }) {
+    if (next.type) setActivityType(next.type);
+    if (next.date !== undefined) setActivityDate(next.date);
+    if (next.hour !== undefined) setActivityHour(next.hour);
+    setActivityPage(1);
+  }
+
+  async function fetchAdminUsers() {
+    setUsersLoading(true);
+    setUsersError('');
+    const query = new URLSearchParams({
+      status: userFilterStatus,
+      page: String(userPage),
+      pageSize: '5',
+    });
+    if (userFilterDate) {
+      const range = dayRange(userFilterDate);
+      query.set('start', range.start);
+      query.set('end', range.end);
+    }
+    const { data, error } = await api.get<AdminActivityResult<AdminUser>>(`/api/admin/users?${query.toString()}`);
+    if (error) setUsersError(error.message);
+    else if (data) setAdminUsers(data);
+    setUsersLoading(false);
+  }
+
+  function changeUserFilter(next: { date?: string; status?: 'all' | 'active' | 'inactive' }) {
+    if (next.date !== undefined) setUserFilterDate(next.date);
+    if (next.status) setUserFilterStatus(next.status);
+    setUserPage(1);
   }
 
   const maxActivity = useMemo(() => {
@@ -371,7 +475,8 @@ export default function Admin() {
             </Panel>
 
             <Panel title="Publications recentes" icon={<FileText className="w-4 h-4" />} className="xl:col-span-2">
-              <PostTable posts={report.content.recent_posts} onToggle={togglePublish} onDelete={deletePost} />
+              <PostTable posts={pageItems(report.content.recent_posts, overviewPostsPage)} onToggle={togglePublish} onDelete={deletePost} />
+              <Pagination page={overviewPostsPage} pageSize={5} total={report.content.recent_posts.length} onPage={setOverviewPostsPage} />
             </Panel>
           </div>
         )}
@@ -386,8 +491,31 @@ export default function Admin() {
                 ['Anonymes', report.content.anonymous_posts],
               ]} />
             </Panel>
-            <Panel title="Contenus recents" icon={<Clock className="w-4 h-4" />} className="xl:col-span-2">
-              <PostTable posts={report.content.recent_posts} onToggle={togglePublish} onDelete={deletePost} />
+            <Panel title="Publications par heure" icon={<Clock className="w-4 h-4" />} className="xl:col-span-2">
+              <ActivityFilters
+                type={activityType}
+                date={activityDate}
+                hour={activityHour}
+                loading={activityLoading}
+                lockedType="posts"
+                onChange={changeActivityFilter}
+                onRefresh={fetchActivity}
+              />
+              {activityError ? (
+                <InlineError message={activityError} />
+              ) : activityLoading ? (
+                <LoadingRows label="Chargement des publications..." />
+              ) : (
+                <>
+                  <PostTable posts={activityPosts.items} onToggle={togglePublish} onDelete={deletePost} />
+                  <Pagination
+                    page={activityPosts.page}
+                    pageSize={activityPosts.pageSize}
+                    total={activityPosts.total}
+                    onPage={setActivityPage}
+                  />
+                </>
+              )}
             </Panel>
           </div>
         )}
@@ -404,18 +532,36 @@ export default function Admin() {
               <Distribution rows={Object.entries(report.collectes.by_status)} />
             </Panel>
             <Panel title="Demandes a traiter" icon={<AlertTriangle className="w-4 h-4" />} className="xl:col-span-3">
-              <CollecteList collectes={pendingCollectes.length ? pendingCollectes : report.collectes.recent} onApprove={approveCollecte} onReject={rejectCollecte} />
+              <CollecteList collectes={pageItems(pendingCollectes.length ? pendingCollectes : report.collectes.recent, collectesPage)} onApprove={approveCollecte} onReject={rejectCollecte} />
+              <Pagination page={collectesPage} pageSize={5} total={(pendingCollectes.length ? pendingCollectes : report.collectes.recent).length} onPage={setCollectesPage} />
             </Panel>
           </div>
         )}
 
         {activeTab === 'users' && (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <Panel title="Nouveaux utilisateurs" icon={<Users className="w-4 h-4" />}>
-              <UserList users={report.users.recent} onStatus={updateUserStatus} onDetails={showUserDetail} />
+            <Panel title="Utilisateurs" icon={<Users className="w-4 h-4" />}>
+              <UserFilters
+                date={userFilterDate}
+                status={userFilterStatus}
+                loading={usersLoading}
+                onChange={changeUserFilter}
+                onRefresh={fetchAdminUsers}
+              />
+              {usersError ? (
+                <InlineError message={usersError} />
+              ) : usersLoading ? (
+                <LoadingRows label="Chargement des utilisateurs..." />
+              ) : (
+                <>
+                  <UserList users={adminUsers.items} onStatus={updateUserStatus} onDetails={showUserDetail} />
+                  <Pagination page={adminUsers.page} pageSize={adminUsers.pageSize} total={adminUsers.total} onPage={setUserPage} />
+                </>
+              )}
             </Panel>
             <Panel title="Utilisateurs actifs" icon={<Activity className="w-4 h-4" />}>
-              <ActiveUserList users={report.users.most_active} onStatus={updateUserStatus} onDetails={showUserDetail} />
+              <ActiveUserList users={pageItems(report.users.most_active, activeUsersPage)} onStatus={updateUserStatus} onDetails={showUserDetail} />
+              <Pagination page={activeUsersPage} pageSize={5} total={report.users.most_active.length} onPage={setActiveUsersPage} />
             </Panel>
           </div>
         )}
@@ -432,7 +578,8 @@ export default function Admin() {
               <Distribution rows={Object.entries(report.media.by_type)} />
             </Panel>
             <Panel title="Medias recents" icon={<Clock className="w-4 h-4" />}>
-              <MediaList media={report.media.recent} />
+              <MediaList media={pageItems(report.media.recent, mediaPage)} />
+              <Pagination page={mediaPage} pageSize={5} total={report.media.recent.length} onPage={setMediaPage} />
             </Panel>
           </div>
         )}
@@ -467,19 +614,215 @@ export default function Admin() {
               <p className="text-xs text-stone-400 leading-relaxed mt-4">Les auteurs anonymes restent masques dans le reporting admin.</p>
             </Panel>
             <Panel title="Top contenus" icon={<Eye className="w-4 h-4" />} className="xl:col-span-2">
-              <PostTable posts={report.content.top_posts} onToggle={togglePublish} onDelete={deletePost} />
+              <PostTable posts={pageItems(report.content.top_posts, topPostsPage)} onToggle={togglePublish} onDelete={deletePost} />
+              <Pagination page={topPostsPage} pageSize={5} total={report.content.top_posts.length} onPage={setTopPostsPage} />
             </Panel>
             <Panel title="Files moderation" icon={<AlertTriangle className="w-4 h-4" />}>
               <StatusRow label="Collectes en attente" value={report.moderation.pending_collectes} good={report.moderation.pending_collectes === 0} />
               <StatusRow label="Contenus brouillon" value={report.moderation.draft_posts} good={report.moderation.draft_posts < 5} />
               <StatusRow label="Collectes rejetees" value={report.moderation.rejected_collectes} good />
             </Panel>
-            <Panel title="Commentaires recents" icon={<MessageCircle className="w-4 h-4" />} className="xl:col-span-3">
-              <CommentList comments={report.moderation.recent_comments} />
+            <Panel title="Recherche par heure" icon={<Calendar className="w-4 h-4" />} className="xl:col-span-3">
+              <ActivityFilters
+                type={activityType}
+                date={activityDate}
+                hour={activityHour}
+                loading={activityLoading}
+                onChange={changeActivityFilter}
+                onRefresh={fetchActivity}
+              />
+              {activityError ? (
+                <InlineError message={activityError} />
+              ) : activityLoading ? (
+                <LoadingRows label="Chargement de la tranche horaire..." />
+              ) : activityType === 'posts' ? (
+                <>
+                  <PostTable posts={activityPosts.items} onToggle={togglePublish} onDelete={deletePost} />
+                  <Pagination page={activityPosts.page} pageSize={activityPosts.pageSize} total={activityPosts.total} onPage={setActivityPage} />
+                </>
+              ) : (
+                <>
+                  <CommentList comments={activityComments.items} />
+                  <Pagination page={activityComments.page} pageSize={activityComments.pageSize} total={activityComments.total} onPage={setActivityPage} />
+                </>
+              )}
             </Panel>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function ActivityFilters({
+  type,
+  date,
+  hour,
+  loading,
+  lockedType,
+  onChange,
+  onRefresh,
+}: {
+  type: 'posts' | 'comments';
+  date: string;
+  hour: string;
+  loading: boolean;
+  lockedType?: 'posts' | 'comments';
+  onChange: (next: { type?: 'posts' | 'comments'; date?: string; hour?: string }) => void;
+  onRefresh: () => void;
+}) {
+  const hourLabel = `${hour}h00 - ${hour}h59`;
+  return (
+    <div className="bg-stone-50 border border-stone-200/70 rounded-xl p-4 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_160px_auto] gap-3 lg:items-end">
+        {!lockedType && (
+          <div>
+            <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">Type</label>
+            <div className="flex rounded-xl bg-white border border-stone-200 p-1">
+              <button
+                type="button"
+                onClick={() => onChange({ type: 'posts' })}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${type === 'posts' ? 'bg-stone-900 text-white' : 'text-stone-500 hover:bg-stone-50'}`}
+              >
+                Publications
+              </button>
+              <button
+                type="button"
+                onClick={() => onChange({ type: 'comments' })}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${type === 'comments' ? 'bg-stone-900 text-white' : 'text-stone-500 hover:bg-stone-50'}`}
+              >
+                Commentaires
+              </button>
+            </div>
+          </div>
+        )}
+        <div>
+          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => onChange({ date: event.target.value })}
+            className="input bg-white"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">Heure</label>
+          <select value={hour} onChange={(event) => onChange({ hour: event.target.value })} className="input bg-white">
+            {Array.from({ length: 24 }).map((_, index) => {
+              const value = String(index).padStart(2, '0');
+              return <option key={value} value={value}>{value}h</option>;
+            })}
+          </select>
+        </div>
+        <button type="button" onClick={onRefresh} disabled={loading} className="btn-secondary px-4 py-3 text-sm disabled:opacity-50">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </button>
+      </div>
+      <p className="text-xs text-stone-400 mt-3">
+        Tranche affichee : {date ? new Date(`${date}T00:00:00`).toLocaleDateString('fr-FR') : '-'} | {hourLabel}
+      </p>
+    </div>
+  );
+}
+
+function UserFilters({
+  date,
+  status,
+  loading,
+  onChange,
+  onRefresh,
+}: {
+  date: string;
+  status: 'all' | 'active' | 'inactive';
+  loading: boolean;
+  onChange: (next: { date?: string; status?: 'all' | 'active' | 'inactive' }) => void;
+  onRefresh: () => void;
+}) {
+  return (
+    <div className="bg-stone-50 border border-stone-200/70 rounded-xl p-4 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_180px_auto] gap-3 lg:items-end">
+        <div>
+          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">Date de creation</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => onChange({ date: event.target.value })}
+            className="input bg-white"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-stone-400 uppercase tracking-wider mb-1.5">Statut</label>
+          <select value={status} onChange={(event) => onChange({ status: event.target.value as 'all' | 'active' | 'inactive' })} className="input bg-white">
+            <option value="all">Tous</option>
+            <option value="active">Actifs</option>
+            <option value="inactive">Non actifs</option>
+          </select>
+        </div>
+        <button type="button" onClick={onRefresh} disabled={loading} className="btn-secondary px-4 py-3 text-sm disabled:opacity-50">
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </button>
+      </div>
+      {date && (
+        <button type="button" onClick={() => onChange({ date: '' })} className="text-xs text-stone-400 hover:text-stone-700 mt-3">
+          Retirer le filtre date
+        </button>
+      )}
+    </div>
+  );
+}
+
+function Pagination({ page, pageSize, total, onPage }: { page: number; pageSize: number; total: number; onPage: (page: number) => void }) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (total === 0) return null;
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 border-t border-stone-100 pt-4">
+      <p className="text-xs text-stone-500">
+        {formatNumber((page - 1) * pageSize + 1)}-{formatNumber(Math.min(total, page * pageSize))} sur {formatNumber(total)}
+      </p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onPage(Math.max(1, page - 1))}
+          disabled={page <= 1}
+          className="btn-secondary w-10 h-10 p-0 disabled:opacity-40"
+          title="Page precedente"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <span className="text-sm font-semibold text-stone-700 min-w-20 text-center">
+          {page} / {totalPages}
+        </span>
+        <button
+          type="button"
+          onClick={() => onPage(Math.min(totalPages, page + 1))}
+          disabled={page >= totalPages}
+          className="btn-secondary w-10 h-10 p-0 disabled:opacity-40"
+          title="Page suivante"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LoadingRows({ label }: { label: string }) {
+  return (
+    <div className="space-y-2">
+      <p className="text-sm text-stone-400">{label}</p>
+      {[0, 1, 2].map((item) => (
+        <div key={item} className="h-20 rounded-xl bg-stone-100 animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+function InlineError({ message }: { message: string }) {
+  return (
+    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      {message}
     </div>
   );
 }
@@ -681,6 +1024,11 @@ function CommentList({ comments }: { comments: AdminComment[] }) {
             <span className="text-xs text-stone-400">{comment.is_anonymous ? 'Auteur masque' : `@${comment.profiles?.username || 'inconnu'}`}</span>
             <span className="text-xs text-stone-400">{formatDate(comment.created_at)}</span>
           </div>
+          {comment.post_id && (
+            <button onClick={() => navigate(`/post/${comment.post_id}`)} className="text-left text-xs font-semibold text-stone-700 hover:underline mb-1 line-clamp-1">
+              {comment.post_title || 'Voir la publication'}
+            </button>
+          )}
           <p className="text-sm text-stone-600 line-clamp-2">{comment.content}</p>
         </div>
       ))}
@@ -727,6 +1075,10 @@ function sum(points: ActivityPoint[], key: keyof ActivityPoint) {
   return points.reduce((total, point) => total + Number(point[key] || 0), 0);
 }
 
+function pageItems<T>(items: T[], page: number, pageSize = 5) {
+  return items.slice((page - 1) * pageSize, page * pageSize);
+}
+
 function formatNumber(value: number) {
   return new Intl.NumberFormat('fr-FR').format(value || 0);
 }
@@ -744,5 +1096,29 @@ function formatBytes(value: number) {
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date(dateStr).toLocaleString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function formatInputDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function hourRange(date: string, hour: string) {
+  const safeDate = date || formatInputDate(new Date());
+  const safeHour = Number(hour);
+  const start = new Date(`${safeDate}T00:00:00`);
+  start.setHours(Number.isFinite(safeHour) ? safeHour : 0, 0, 0, 0);
+  const end = new Date(start);
+  end.setHours(start.getHours() + 1);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+function dayRange(date: string) {
+  const start = new Date(`${date}T00:00:00`);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 1);
+  return { start: start.toISOString(), end: end.toISOString() };
 }

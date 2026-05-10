@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { navigate, Link } from '../hooks/useRouter';
-import { BookOpen, Heart, MessageCircle, Eye, Lock, ArrowLeft, Settings, SquarePen, Trash2, Camera, Upload } from 'lucide-react';
+import { BookOpen, Heart, MessageCircle, Eye, Lock, ArrowLeft, Settings, SquarePen, Trash2, Camera, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProfileData {
   id: string;
@@ -37,6 +37,8 @@ export default function Profile({ username }: { username: string }) {
   const [editName, setEditName] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
+  const [postsPage, setPostsPage] = useState(1);
+  const postsPageSize = 5;
 
   const isOwn = currentUser && currentProfile?.username === username;
 
@@ -84,7 +86,11 @@ export default function Profile({ username }: { username: string }) {
     event.preventDefault();
     event.stopPropagation();
     await supabase.from('posts').delete().eq('id', postId);
-    setPosts((items) => items.filter((item) => item.id !== postId));
+    setPosts((items) => {
+      const next = items.filter((item) => item.id !== postId);
+      setPostsPage((page) => Math.min(page, Math.max(1, Math.ceil(next.length / postsPageSize))));
+      return next;
+    });
   }
 
   function editPost(postId: string, event: React.MouseEvent) {
@@ -149,6 +155,9 @@ export default function Profile({ username }: { username: string }) {
       month: 'long', year: 'numeric'
     });
   }
+
+  const totalPostPages = Math.max(1, Math.ceil(posts.length / postsPageSize));
+  const visiblePosts = posts.slice((postsPage - 1) * postsPageSize, postsPage * postsPageSize);
 
   if (loading) {
     return (
@@ -294,7 +303,7 @@ export default function Profile({ username }: { username: string }) {
           </div>
         ) : (
           <div className="space-y-4">
-            {posts.map((post) => (
+            {visiblePosts.map((post) => (
               <Link key={post.id} to={`/post/${post.id}`} className="block group">
                 <article className="bg-white rounded-xl border border-stone-200/60 p-5 hover:shadow-md transition-all duration-200">
                   <div className="flex items-start gap-4">
@@ -353,6 +362,36 @@ export default function Profile({ username }: { username: string }) {
                 </article>
               </Link>
             ))}
+            {posts.length > postsPageSize && (
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+                <p className="text-xs text-stone-500">
+                  {(postsPage - 1) * postsPageSize + 1}-{Math.min(posts.length, postsPage * postsPageSize)} sur {posts.length} histoires
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPostsPage((page) => Math.max(1, page - 1))}
+                    disabled={postsPage <= 1}
+                    className="btn-secondary w-10 h-10 p-0 disabled:opacity-40"
+                    title="Page precedente"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm font-semibold text-stone-700 min-w-16 text-center">
+                    {postsPage} / {totalPostPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPostsPage((page) => Math.min(totalPostPages, page + 1))}
+                    disabled={postsPage >= totalPostPages}
+                    className="btn-secondary w-10 h-10 p-0 disabled:opacity-40"
+                    title="Page suivante"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
         </>

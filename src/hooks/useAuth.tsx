@@ -25,7 +25,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = !!(profile?.role === 'admin' || (user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())));
 
   useEffect(() => {
+    let mounted = true;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id, session.user.email);
@@ -34,23 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setProfile(null);
-        setLoading(false);
-        return;
-      }
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id, session.user.email);
-      } else {
-        setProfile(null);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => { mounted = false; };
   }, []);
 
   async function fetchProfile(userId: string, email?: string) {

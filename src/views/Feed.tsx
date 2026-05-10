@@ -62,7 +62,9 @@ export default function Feed() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cat = params.get('category');
+    const type = params.get('type');
     if (cat) setActiveCategory(cat);
+    if (type && typeConfig[type]) setActiveType(type);
   }, []);
 
   useEffect(() => { fetchCategories(); }, []);

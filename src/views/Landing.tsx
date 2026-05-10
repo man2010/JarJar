@@ -126,28 +126,28 @@ export default function Landing() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
-            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?category=article')}>
+            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?type=article')}>
               <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 mb-4 group-hover:scale-110 transition-transform duration-300">
                 <BookOpen className="w-6 h-6" />
               </div>
               <h3 className="text-base font-semibold text-stone-900 mb-1">Articles</h3>
               <p className="text-xs text-stone-500 leading-relaxed">Ecris ton parcours en profondeur</p>
             </div>
-            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?category=video')}>
+            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?type=video')}>
               <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Video className="w-6 h-6" />
               </div>
               <h3 className="text-base font-semibold text-stone-900 mb-1">Videos</h3>
               <p className="text-xs text-stone-500 leading-relaxed">Montre ton histoire en images</p>
             </div>
-            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?category=audio')}>
+            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?type=audio')}>
               <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600 mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Headphones className="w-6 h-6" />
               </div>
               <h3 className="text-base font-semibold text-stone-900 mb-1">Audios</h3>
               <p className="text-xs text-stone-500 leading-relaxed">Parle, ta voix compte</p>
             </div>
-            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?category=confession')}>
+            <div className="group p-6 bg-white border border-stone-200/60 rounded-2xl card-hover cursor-pointer" onClick={() => navigate('/feed?type=confession')}>
               <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Lock className="w-6 h-6" />
               </div>
