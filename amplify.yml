@@ -1,0 +1,32 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+
+    build:
+      commands:
+        # ── Écriture sécurisée des variables dans .env.production ──
+        # On utilise echo individuel pour éviter les problèmes d'indentation
+        # du heredoc dans YAML (espaces parasites qui cassent le parsing)
+        - echo "MONGODB_DB=$MONGODB_DB" >> .env.production
+        - echo "AUTH_SECRET=$AUTH_SECRET" >> .env.production
+        - echo "NEXT_PUBLIC_ADMIN_EMAILS=$NEXT_PUBLIC_ADMIN_EMAILS" >> .env.production
+        - echo "AWS_REGION=$AWS_REGION" >> .env.production
+        - echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env.production
+        - echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env.production
+        - echo "AWS_S3_BUCKET=$AWS_S3_BUCKET" >> .env.production
+        # ── Vérification visible dans les logs de build ──
+        - echo "✅ .env.production généré avec $(wc -l < .env.production) lignes"
+        - npm run build
+
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
