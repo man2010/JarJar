@@ -43,7 +43,7 @@ export default function MediaRecorderField({ kind, value, onChange, onUploadingC
   async function startRecording() {
     setError('');
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError('Ton navigateur ne permet pas l enregistrement media sur cette page.');
+      setError('Ton navigateur ne permet pas l’enregistrement media sur cette page.');
       return;
     }
     const constraints = kind === 'audio' ? { audio: true } : { audio: true, video: true };

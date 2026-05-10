@@ -110,10 +110,10 @@ export default function NewPost({ editId }: { editId?: string }) {
       data.append('kind', 'image');
       const response = await fetch('/api/media', { method: 'POST', body: data, credentials: 'include' });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.error || 'Upload de l image impossible');
+      if (!response.ok) throw new Error(payload.error || 'Upload de l’image impossible');
       setCoverImageUrl(payload.data.url);
     } catch (error) {
-      setCoverUploadError(error instanceof Error ? error.message : 'Upload de l image impossible');
+      setCoverUploadError(error instanceof Error ? error.message : 'Upload de l’image impossible');
     } finally {
       setCoverUploading(false);
     }
@@ -193,7 +193,7 @@ export default function NewPost({ editId }: { editId?: string }) {
               )}
             </div>
             <div className="mt-2 min-h-[18px]">
-              {coverUploading && <p className="text-xs text-stone-400">Upload de l image...</p>}
+              {coverUploading && <p className="text-xs text-stone-400">Upload de l’image...</p>}
               {coverUploadError && <p className="text-xs text-red-600">{coverUploadError}</p>}
               {!coverUploading && !coverUploadError && coverImageUrl && (
                 <p className="text-xs text-stone-400 truncate">Image selectionnee : {coverImageUrl}</p>
@@ -305,7 +305,7 @@ export default function NewPost({ editId }: { editId?: string }) {
           <div className="flex items-center gap-3 pt-4">
             <button type="submit" disabled={submitting || mediaUploading || coverUploading || !title.trim() || (!content.trim() && !audioUrl && !videoUrl)}
               className="btn-primary flex-1 py-4 text-base disabled:opacity-40 disabled:cursor-not-allowed">
-              {coverUploading ? 'Envoi de l image...' : mediaUploading ? 'Envoi du media...' : submitting ? 'Enregistrement...' : editId ? 'Enregistrer' : 'Publier'}
+              {coverUploading ? 'Envoi de l’image...' : mediaUploading ? 'Envoi du media...' : submitting ? 'Enregistrement...' : editId ? 'Enregistrer' : 'Publier'}
             </button>
             <button type="button" onClick={async () => {
               if (mediaUploading || coverUploading || !title.trim() || (!content.trim() && !audioUrl && !videoUrl)) return;

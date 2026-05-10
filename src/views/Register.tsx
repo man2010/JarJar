@@ -80,9 +80,9 @@ export default function Register() {
                 className="mt-0.5 w-4 h-4 rounded border-stone-300 text-stone-900 focus:ring-stone-500"
               />
               <span className="text-xs text-stone-500 leading-relaxed">
-                J ai lu et j accepte les{' '}
+                J’ai lu et j’accepte les{' '}
                 <button type="button" onClick={() => navigate('/footer/cgu')} className="font-semibold text-stone-900 hover:underline">
-                  conditions generales d utilisation
+                  conditions générales d’utilisation
                 </button>
                 .
               </span>

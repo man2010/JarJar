@@ -214,7 +214,7 @@ async function insertRows(db: any, body: DataRequest, user: Awaited<ReturnType<t
     if (body.table === 'collecte_dons' || body.table === 'collecte_comments') {
       const collecte = await db.collection('collectes').findOne({ id: doc.collecte_id });
       if (!collecte || collecte.status !== 'approved') {
-        return NextResponse.json({ error: 'Cette collecte n est pas encore ouverte au public' }, { status: 403 });
+        return NextResponse.json({ error: 'Cette collecte n’est pas encore ouverte au public' }, { status: 403 });
       }
     }
     if (body.table === 'posts') {
