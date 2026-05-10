@@ -169,10 +169,10 @@ export default function NewPost({ editId }: { editId?: string }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1.5">Image de couverture <span className="text-stone-400 font-normal">(URL)</span></label>
+            <label className="block text-sm font-medium text-stone-700 mb-1.5">Image de couverture <span className="text-stone-400 font-normal">(lien ou fichier)</span></label>
             <div className="flex gap-2">
-              <input type="url" value={coverImageUrl} onChange={(e) => { setCoverImageUrl(e.target.value); setCoverUploadError(''); }}
-                placeholder="https://example.com/image.jpg" className="input flex-1" />
+              <input type="text" value={coverImageUrl} onChange={(e) => { setCoverImageUrl(e.target.value); setCoverUploadError(''); }}
+                placeholder="https://example.com/image.jpg ou /api/media/..." className="input flex-1" />
               <label className={`btn-secondary w-12 px-0 flex-shrink-0 cursor-pointer ${coverUploading ? 'opacity-60 cursor-wait' : ''}`} title="Uploader une image locale">
                 <Upload className="w-4 h-4" />
                 <input
